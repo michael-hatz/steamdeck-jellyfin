@@ -1,0 +1,130 @@
+/* Dienste-Menü (Taste X) */
+#jellyfin-deck-switcher {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 2147483647;
+    background: rgba(0, 0, 0, 0.7);
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font: 500 24px/1.2 "Noto Sans", system-ui, sans-serif;
+}
+
+#jellyfin-deck-switcher.jds-open {
+    display: flex;
+}
+
+#jellyfin-deck-switcher .jds-panel {
+    width: min(1200px, 92vw);
+    padding: 1.4em;
+    background: rgba(16, 16, 20, 0.97);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+    box-sizing: border-box;
+}
+
+#jellyfin-deck-switcher .jds-title {
+    margin-bottom: 0.9em;
+    font-size: 1.1em;
+}
+
+#jellyfin-deck-switcher .jds-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.7em;
+}
+
+#jellyfin-deck-switcher .jds-tile {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 16 / 9;
+    padding: 0.5em;
+    background: var(--jds-color);
+    border: 4px solid transparent;
+    border-radius: 12px;
+    text-align: center;
+    font-weight: 700;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.1s;
+    box-sizing: border-box;
+}
+
+#jellyfin-deck-switcher .jds-tile.jds-focus {
+    border-color: #fff;
+    transform: scale(1.06);
+}
+
+#jellyfin-deck-switcher .jds-current {
+    display: none;
+    position: absolute;
+    left: 0.5em;
+    bottom: 0.4em;
+    font-size: 0.6em;
+    font-weight: 500;
+    opacity: 0.85;
+}
+
+#jellyfin-deck-switcher .jds-is-current .jds-current {
+    display: block;
+}
+
+#jellyfin-deck-switcher .jds-hints {
+    display: flex;
+    justify-content: center;
+    gap: 1.4em;
+    margin-top: 1em;
+    font-size: 0.7em;
+    opacity: 0.7;
+}
+
+#jellyfin-deck-switcher .jds-hints b {
+    display: inline-block;
+    min-width: 1.4em;
+    padding: 0 0.3em;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.2);
+    text-align: center;
+}
+
+/* Fokus-Rahmen auf Seiten ohne TV-Oberfläche */
+#jellyfin-deck-focus {
+    display: none;
+    position: fixed;
+    z-index: 2147483646;
+    border: 4px solid #00a4dc;
+    border-radius: 10px;
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.6), 0 0 18px rgba(0, 164, 220, 0.7);
+    pointer-events: none;
+    box-sizing: border-box;
+    transition: left 0.08s, top 0.08s, width 0.08s, height 0.08s;
+}
+
+#jellyfin-deck-focus.jdf-open {
+    display: block;
+}
+
+/* Mauszeiger (rechter Stick) */
+#jellyfin-deck-cursor {
+    display: none;
+    position: fixed;
+    z-index: 2147483647;
+    width: 28px;
+    height: 28px;
+    margin: -14px 0 0 -14px;
+    border: 3px solid #fff;
+    border-radius: 50%;
+    background: rgba(0, 164, 220, 0.6);
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.6);
+    pointer-events: none;
+    box-sizing: border-box;
+}
+
+#jellyfin-deck-cursor.jdc-open {
+    display: block;
+}

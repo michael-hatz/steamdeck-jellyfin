@@ -1,0 +1,135 @@
+#jellyfin-deck-osk {
+    display: none;
+    position: fixed;
+    left: 50%;
+    bottom: 3vh;
+    transform: translateX(-50%);
+    width: min(1100px, 94vw);
+    padding: 1.2em;
+    z-index: 2147483647;
+    background: rgba(16, 16, 20, 0.97);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+    color: #fff;
+    font: 500 22px/1.2 "Noto Sans", system-ui, sans-serif;
+    box-sizing: border-box;
+}
+
+#jellyfin-deck-osk.jdo-open {
+    display: block;
+}
+
+#jellyfin-deck-osk .jdo-preview {
+    min-height: 1.6em;
+    margin-bottom: 0.8em;
+    padding: 0.4em 0.6em;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    font-size: 1.2em;
+    white-space: pre;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#jellyfin-deck-osk .jdo-preview:empty::before {
+    content: attr(data-placeholder);
+    opacity: 0.4;
+}
+
+#jellyfin-deck-osk .jdo-preview::after {
+    content: "▏";
+    animation: jdo-blink 1s steps(1) infinite;
+}
+
+@keyframes jdo-blink {
+    50% { opacity: 0; }
+}
+
+#jellyfin-deck-osk .jdo-row {
+    display: flex;
+    gap: 0.35em;
+    margin-bottom: 0.35em;
+}
+
+#jellyfin-deck-osk .jdo-key {
+    flex: 1 1 0;
+    padding: 0.55em 0;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    cursor: pointer;
+    user-select: none;
+}
+
+#jellyfin-deck-osk .jdo-special {
+    font-size: 0.85em;
+    padding: 0.65em 0;
+}
+
+#jellyfin-deck-osk .jdo-active {
+    background: rgba(170, 92, 195, 0.5);
+}
+
+#jellyfin-deck-osk .jdo-focus {
+    background: #00a4dc;
+    transform: scale(1.08);
+}
+
+#jellyfin-deck-osk .jdo-hints {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.4em;
+    margin-top: 0.6em;
+    font-size: 0.7em;
+    opacity: 0.7;
+}
+
+#jellyfin-deck-osk .jdo-hints b {
+    display: inline-block;
+    min-width: 1.4em;
+    padding: 0 0.3em;
+    margin-right: 0.3em;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.2);
+    text-align: center;
+}
+
+/* Anzeige beim Halten von View + Start (Beenden) */
+#jellyfin-deck-quit {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(520px, 80vw);
+    padding: 1.4em 1.6em;
+    z-index: 2147483647;
+    background: rgba(16, 16, 20, 0.97);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+    color: #fff;
+    font: 500 24px/1.2 "Noto Sans", system-ui, sans-serif;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+#jellyfin-deck-quit.jdq-open {
+    display: block;
+}
+
+#jellyfin-deck-quit .jdq-bar {
+    height: 8px;
+    margin-top: 0.9em;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+#jellyfin-deck-quit .jdq-bar > div {
+    width: 0;
+    height: 100%;
+    background: #00a4dc;
+}

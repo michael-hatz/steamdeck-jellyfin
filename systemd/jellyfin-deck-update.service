@@ -1,0 +1,10 @@
+[Unit]
+Description=Jellyfin Deck: Chromium und Erweiterungen aktualisieren
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/share/jellyfin-deck/update.sh
+Nice=10
+IOSchedulingClass=idle

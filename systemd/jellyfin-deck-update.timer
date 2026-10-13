@@ -1,0 +1,12 @@
+[Unit]
+Description=Jellyfin Deck täglich aktualisieren
+
+[Timer]
+# Kurz nach dem Einschalten und danach täglich (auch nach dem Aufwachen aus dem Standby)
+OnStartupSec=5min
+OnCalendar=daily
+Persistent=true
+RandomizedDelaySec=15min
+
+[Install]
+WantedBy=timers.target

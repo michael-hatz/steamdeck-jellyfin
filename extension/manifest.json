@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "Jellyfin Deck",
+  "version": "1.1.0",
+  "description": "Controller-Steuerung, Dienste-Menü und Bildschirmtastatur für Jellyfin und Streaming-Seiten.",
+  "permissions": ["tabs", "debugger", "storage"],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["config.js", "services.js", "prelude.js"],
+      "run_at": "document_start"
+    },
+    {
+      "matches": ["<all_urls>"],
+      "js": ["osk.js", "switcher.js", "spatnav.js", "gamepad.js"],
+      "css": ["osk.css", "deck.css"],
+      "run_at": "document_idle"
+    }
+  ]
+}

@@ -2,6 +2,7 @@
 # Installiert "Jellyfin Deck" auf dem Steam Deck (im Desktop-Modus ausführen).
 #
 #   ./install.sh http://192.168.178.20:8096
+#   ./install.sh            (erneut: übernimmt die gespeicherte Adresse)
 set -euo pipefail
 
 APP_ID="org.chromium.Chromium"
@@ -13,6 +14,10 @@ DESKTOP_FILE="$HOME/.local/share/applications/jellyfin-deck.desktop"
 SYSTEMD_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/systemd/user"
 
 URL="${1:-}"
+if [ -z "$URL" ] && [ -f "$CONFIG_DIR/config" ]; then
+    URL="$(grep '^JELLYFIN_URL=' "$CONFIG_DIR/config" | cut -d= -f2- | tr -d '"')"
+    [ -n "$URL" ] && echo "==> Verwende gespeicherte Adresse $URL"
+fi
 if [ -z "$URL" ]; then
     read -rp "Jellyfin-Adresse (z. B. http://192.168.178.20:8096): " URL
 fi

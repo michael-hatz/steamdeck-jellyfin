@@ -20,7 +20,7 @@ mitinstalliert.
 2. Konsole öffnen und ausführen (Adresse durch deinen Jellyfin-Server ersetzen, ohne `/web`):
 
    ```bash
-   git clone https://github.com/DEIN-NAME/steamdeck-jellyfin.git
+   git clone https://github.com/michael-hatz/steamdeck-jellyfin.git
    cd steamdeck-jellyfin
    ./install.sh http://192.168.178.20:8096
    ```
@@ -51,10 +51,10 @@ dann im Desktop-Modus über Discover aktualisieren.
 ```bash
 cd steamdeck-jellyfin
 git pull
-./install.sh http://192.168.178.20:8096
+./install.sh
 ```
 
-Dabei werden auch uBlock Origin Lite und SponsorBlock auf den neuesten Stand gebracht. Der
+Die gespeicherte Server-Adresse wird übernommen. Dabei werden auch uBlock Origin Lite und SponsorBlock auf den neuesten Stand gebracht. Der
 Steam-Eintrag bleibt, wie er ist (samt Controller-Einstellung).
 
 ## Steuerung

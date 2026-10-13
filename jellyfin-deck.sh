@@ -6,6 +6,7 @@ set -u
 CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/jellyfin-deck/config"
 APP_ID="org.chromium.Chromium"
 DATA_DIR="$HOME/.var/app/$APP_ID/data/jellyfin-deck"
+ARTWORK_DIR="$HOME/.local/share/jellyfin-deck/steam"
 
 JELLYFIN_URL=""
 SCALE="1"
@@ -16,6 +17,9 @@ if [ -z "$JELLYFIN_URL" ]; then
     echo "Keine JELLYFIN_URL in $CONFIG gesetzt." >&2
     exit 1
 fi
+
+# Bilder für den Steam-Eintrag nachtragen, falls er bei der Installation noch fehlte
+[ -f "$ARTWORK_DIR/set-artwork.py" ] && python3 -I "$ARTWORK_DIR/set-artwork.py" "$ARTWORK_DIR" >/dev/null 2>&1 &
 
 # Nach dem Aufwachen aus dem Standby braucht das WLAN manchmal ein paar Sekunden
 for _ in $(seq 1 20); do

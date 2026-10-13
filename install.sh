@@ -51,6 +51,8 @@ rm -rf "$DATA_DIR/extension"
 cp -r "$SRC_DIR/extension" "$DATA_DIR/extension"
 install -m 755 "$SRC_DIR/jellyfin-deck.sh" "$INSTALL_DIR/jellyfin-deck.sh"
 install -m 755 "$SRC_DIR/update.sh" "$INSTALL_DIR/update.sh"
+mkdir -p "$INSTALL_DIR/steam"
+install -m 644 "$SRC_DIR"/steam/*.png "$SRC_DIR/steam/set-artwork.py" "$INSTALL_DIR/steam/"
 
 # Lädt uBlock Origin Lite und SponsorBlock (und prüft auf ein Chromium-Update)
 "$INSTALL_DIR/update.sh"
@@ -76,19 +78,13 @@ JELLYFIN_URL="$URL"
 SCALE="$SCALE"
 EOF
 
-ICON="video-display"
-if curl -sf -m 5 -o "$INSTALL_DIR/icon.png" "$URL/web/touchicon.png" 2>/dev/null \
-    || curl -sf -m 5 -o "$INSTALL_DIR/icon.png" "$URL/web/favicon.png" 2>/dev/null; then
-    ICON="$INSTALL_DIR/icon.png"
-fi
-
 cat > "$DESKTOP_FILE" <<EOF
 [Desktop Entry]
 Type=Application
 Name=Jellyfin
 Comment=Jellyfin im TV-Modus mit Controller-Steuerung
 Exec=$INSTALL_DIR/jellyfin-deck.sh
-Icon=$ICON
+Icon=$INSTALL_DIR/steam/icon.png
 Categories=AudioVideo;Video;Player;
 Terminal=false
 EOF
@@ -113,6 +109,19 @@ else
       Steam öffnen → "Spiele" → "Ein Nicht-Steam-Spiel zu meiner Bibliothek hinzufügen"
       → "Jellyfin" anhaken → "Ausgewählte Programme hinzufügen"
 EOF
+fi
+
+echo "==> Bilder für die Steam-Bibliothek ..."
+# Steam schreibt einen neuen Eintrag erst nach ein paar Sekunden in shortcuts.vdf
+ARTWORK=""
+for _ in $(seq 1 10); do
+    python3 -I "$INSTALL_DIR/steam/set-artwork.py" "$INSTALL_DIR/steam" && { ARTWORK=1; break; }
+    sleep 1
+done
+if [ -n "$ARTWORK" ]; then
+    echo "    hinterlegt (sichtbar nach einem Neustart von Steam)."
+else
+    echo "    Steam-Eintrag noch nicht gefunden – die Bilder werden beim ersten Start gesetzt."
 fi
 
 cat <<EOF

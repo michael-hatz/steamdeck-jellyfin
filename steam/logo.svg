@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1280" height="400" viewBox="0 0 1280 400"><defs><linearGradient id="g" x1="110.25" y1="213.3" x2="496.14" y2="436.09" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#aa5cc3"/><stop offset="1" stop-color="#00a4dc"/></linearGradient>
+<symbol id="icon" viewBox="0 0 512 512"><path d="M256,201.62c-20.44,0-86.23,119.29-76.2,139.43s142.48,19.92,152.4,0S276.47,201.630,256,201.62Z" fill="url(#g)"/><path d="M256,23.3c-61.56,0-259.82,359.43-229.59,420.13s429.34,60,459.24,0S317.62,23.3,256,23.3ZM406.51,390.76c-19.59,39.33-281.08,39.77-300.89,0S215.71,115.48,256.06,115.48,426.1,351.42,406.51,390.76Z" fill="url(#g)"/></symbol>
+<radialGradient id="bg" cx="0.5" cy="0.35" r="0.9"><stop offset="0" stop-color="#1c2340"/><stop offset="1" stop-color="#05070f"/></radialGradient></defs>
+<use xlink:href="#icon" x="20" y="40" width="320" height="320"/>
+<text x="810" y="262" font-size="200" letter-spacing="12" font-family="Lato" font-weight="900" fill="#ffffff" text-anchor="middle">JELLYFIN</text></svg>

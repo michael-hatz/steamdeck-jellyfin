@@ -29,6 +29,10 @@ mitinstalliert.
    Steam → *Spiele* → *Ein Nicht-Steam-Spiel zu meiner Bibliothek hinzufügen* → „Jellyfin“.
 4. Zurück in den Gaming-Modus und „Jellyfin“ aus der Bibliothek starten.
 
+Der Steam-Eintrag bekommt eigene Bilder (Cover, Banner, Hintergrund und Logo). Sie erscheinen nach
+einem Neustart von Steam; fehlte der Eintrag bei der Installation noch, werden sie beim ersten Start
+von Jellyfin gesetzt. Selbst gewählte Bilder werden nicht überschrieben.
+
 Beim ersten Start meldest du dich einmal an. Die Anmeldung bleibt gespeichert – das gilt auch
 für die Streaming-Dienste (Netflix, RTL+, Joyn …), dort einmal über die Webseite anmelden.
 
@@ -148,6 +152,7 @@ Danach den Eintrag „Jellyfin“ in Steam entfernen.
 | `install.sh`             | Installiert Chromium (Flatpak), uBlock Origin Lite, SponsorBlock, Launcher, Steam-Eintrag |
 | `jellyfin-deck.sh`       | Launcher: startet Chromium im Kiosk-Modus           |
 | `update.sh`              | Aktualisiert Chromium und die Erweiterungen         |
+| `steam/*`                | Bilder für die Steam-Bibliothek (PNG, Quellen als SVG) und `set-artwork.py`, das sie einträgt |
 | `systemd/*`              | Timer, der `update.sh` täglich ausführt             |
 | `extension/services.js`  | Liste der Dienste im Dienste-Menü                   |
 | `extension/config.js`    | Jellyfin-Adresse (schreibt der Launcher bei jedem Start) |

@@ -11,8 +11,8 @@ Bildschirmtastatur mit.
 Über das **Dienste-Menü** (Taste **X**) wechselst du außerdem zu ARD Mediathek, ZDF Mediathek,
 YouTube, ARTE, RTL+, Netflix, Joyn und Plex. Jeder Dienst läuft in einem eigenen Tab; beim Zurückwechseln
 bist du wieder an derselben Stelle (die Wiedergabe wird beim Wechseln pausiert). Für YouTube werden
-**uBlock Origin Lite** (Werbeblocker) und **SponsorBlock** (überspringt Sponsoren-Abschnitte)
-mitinstalliert.
+**uBlock Origin Lite** (Werbeblocker), **SponsorBlock** (überspringt Sponsoren-Abschnitte) und
+**enhanced-h264ify** (lässt YouTube H.264 statt VP9/AV1 liefern, siehe *Probleme*) mitinstalliert.
 
 ## Installation
 
@@ -38,7 +38,7 @@ für die Streaming-Dienste (Netflix, RTL+, Joyn …), dort einmal über die Webs
 
 ### Automatische Updates
 
-Chromium, uBlock Origin Lite und SponsorBlock werden **täglich automatisch** aktualisiert
+Chromium, uBlock Origin Lite, SponsorBlock und enhanced-h264ify werden **täglich automatisch** aktualisiert
 (systemd-Timer, läuft auch im Gaming-Modus). Ein neues Chromium gilt ab dem nächsten Start von
 Jellyfin; läuft Jellyfin gerade, werden die Erweiterungen beim nächsten Durchlauf getauscht.
 
@@ -58,7 +58,7 @@ git pull
 ./install.sh
 ```
 
-Die gespeicherte Server-Adresse wird übernommen. Dabei werden auch uBlock Origin Lite und SponsorBlock auf den neuesten Stand gebracht. Der
+Die gespeicherte Server-Adresse wird übernommen. Dabei werden auch die Erweiterungen auf den neuesten Stand gebracht. Der
 Steam-Eintrag bleibt, wie er ist (samt Controller-Einstellung).
 
 ## Steuerung
@@ -124,6 +124,8 @@ SCALE="1"      # z. B. 1.25 oder 1.5, wenn die Oberfläche am TV zu klein ist
 
 - **Controller reagiert nicht oder bewegt die Maus:** In Steam bei „Jellyfin“ auf das
   Controller-Symbol → Layout **„Gamepad“** wählen (nicht „Webbrowser“ oder „Maus“).
+- **Nur ein später verbundener Controller funktioniert:** Der Launcher gibt Chromium dafür
+  `/run/udev` frei. Bei älteren Installationen `./install.sh` erneut ausführen.
 - **Oberfläche ist nicht im TV-Modus:** Wird beim Start automatisch gesetzt. Notfalls in Jellyfin
   unter *Einstellungen → Anzeige → Anzeigemodus* „TV“ wählen.
 - **Video ruckelt:** Jellyfin transkodiert dann wahrscheinlich. In der Wiedergabe unter
@@ -135,6 +137,10 @@ SCALE="1"      # z. B. 1.25 oder 1.5, wenn die Oberfläche am TV zu klein ist
   ausführen (oder `./install.sh` erneut); dabei werden uBlock Origin Lite und SponsorBlock in der
   neuesten Version geladen. (Das klassische
   uBlock Origin läuft im aktuellen Chromium nicht mehr, daher die Lite-Version.)
+- **Bildfehler auf YouTube (Blöcke, grüne Flächen, Schlieren):** Das ist ein Fehler der
+  Hardware-Dekodierung von VP9/AV1, nicht im Video. enhanced-h264ify verhindert ihn, indem YouTube
+  H.264 liefert (höchstens 1080p – für den Deck-Bildschirm reicht das). Fehlt die Erweiterung, wie
+  oben beschrieben das Update anstoßen.
 - **Neue Server-Adresse:** `./install.sh <neue-adresse>` erneut ausführen.
 
 ## Deinstallation
@@ -149,7 +155,7 @@ Danach den Eintrag „Jellyfin“ in Steam entfernen.
 
 | Datei                    | Zweck                                              |
 |--------------------------|----------------------------------------------------|
-| `install.sh`             | Installiert Chromium (Flatpak), uBlock Origin Lite, SponsorBlock, Launcher, Steam-Eintrag |
+| `install.sh`             | Installiert Chromium (Flatpak), uBlock Origin Lite, SponsorBlock, enhanced-h264ify, Launcher, Steam-Eintrag |
 | `jellyfin-deck.sh`       | Launcher: startet Chromium im Kiosk-Modus           |
 | `update.sh`              | Aktualisiert Chromium und die Erweiterungen         |
 | `steam/*`                | Bilder für die Steam-Bibliothek (PNG, Quellen als SVG) und `set-artwork.py`, das sie einträgt |

@@ -54,7 +54,7 @@ install -m 755 "$SRC_DIR/update.sh" "$INSTALL_DIR/update.sh"
 mkdir -p "$INSTALL_DIR/steam"
 install -m 644 "$SRC_DIR"/steam/*.png "$SRC_DIR/steam/set-artwork.py" "$INSTALL_DIR/steam/"
 
-# Lädt uBlock Origin Lite und SponsorBlock (und prüft auf ein Chromium-Update)
+# Lädt uBlock Origin Lite, SponsorBlock und enhanced-h264ify (und prüft auf ein Chromium-Update)
 "$INSTALL_DIR/update.sh"
 
 echo "==> Automatische Updates (täglich) ..."

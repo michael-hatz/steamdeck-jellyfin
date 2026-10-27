@@ -30,13 +30,16 @@ done
 # Adresse für das Dienste-Menü an die Erweiterung weitergeben
 printf "self.JD_JELLYFIN_URL = '%s';\n" "${JELLYFIN_URL//\'/}" > "$DATA_DIR/extension/config.js"
 
-# Eigene Erweiterung plus Werbeblocker (uBlock Origin Lite) und SponsorBlock, falls installiert
+# Eigene Erweiterung plus Werbeblocker (uBlock Origin Lite), SponsorBlock und
+# enhanced-h264ify (H.264 statt VP9/AV1 auf YouTube), falls installiert
 EXTENSIONS="$DATA_DIR/extension"
-for ext in ublock sponsorblock; do
+for ext in ublock sponsorblock h264ify; do
     [ -f "$DATA_DIR/$ext/manifest.json" ] && EXTENSIONS="$EXTENSIONS,$DATA_DIR/$ext"
 done
 
-exec flatpak run "$APP_ID" \
+# /run/udev: Ohne die udev-Datenbank erkennt Chromium in der Flatpak-Sandbox nur Controller,
+# die erst nach dem Start verbunden werden – nicht die, die beim Start schon da sind
+exec flatpak run --filesystem=/run/udev:ro "$APP_ID" \
     --user-data-dir="$DATA_DIR/profile" \
     --load-extension="$EXTENSIONS" \
     --silent-debugger-extension-api \

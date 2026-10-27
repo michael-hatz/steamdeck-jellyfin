@@ -37,6 +37,8 @@
     const SEEK_FORWARD = 30;
     const QUIT_HOLD = 1500;
     const AUTOFOCUS_INTERVAL = 500;
+    const PLAYER_HOVER_INTERVAL = 2000;
+    const PLAYER_HOVER_TIMEOUT = 8000;
 
     const KEYS = {
         up: ['ArrowUp', 38],
@@ -56,6 +58,7 @@
     const repeat = { dir: null, next: 0 };
     const quit = { since: 0, sent: false, combo: false, overlay: null };
     const cursor = { el: null, x: innerWidth / 2, y: innerHeight / 2, lastMove: 0 };
+    const playerHover = { el: null, at: 0, jitter: 0, lastInput: 0 };
 
     function send(message) {
         try {
@@ -280,6 +283,33 @@
         cursor.lastMove = now;
     }
 
+    // Player blenden ihre Bedienleiste ohne Mausbewegung aus (YouTube nach ~3 s) – dann stünde
+    // der Rahmen über unsichtbaren Knöpfen. Solange der Fokus in der Leiste ist, die Maus
+    // regelmäßig über den fokussierten Knopf bewegen; das zeigt nebenbei dessen Beschriftung.
+    // Nach einer Weile ohne Eingabe nicht mehr, damit die Leiste beim Zuschauen verschwindet.
+    function keepPlayerControls(now) {
+        const el = nav.current();
+        const media = activeMedia();
+        if (!el || cursorVisible() || !media || media.tagName !== 'VIDEO' || el === media) {
+            playerHover.el = null;
+            return;
+        }
+        if (el === playerHover.el && now - playerHover.at < PLAYER_HOVER_INTERVAL) return;
+        if (!playerContainer(media).contains(el)) return;
+        if (now - playerHover.lastInput > PLAYER_HOVER_TIMEOUT) {
+            // Leiste blendet sich gleich aus – Rahmen auch, statt über dem Video zu stehen
+            playerHover.el = null;
+            if (!media.paused) nav.hide();
+            return;
+        }
+        playerHover.el = el;
+        playerHover.at = now;
+        // Ein Pixel Versatz, damit die Seite die Bewegung sicher als neue Mausbewegung sieht
+        playerHover.jitter = playerHover.jitter ? 0 : 1;
+        const r = el.getBoundingClientRect();
+        send({ type: 'hover', x: r.left + r.width / 2 + playerHover.jitter, y: r.top + r.height / 2 });
+    }
+
     const generic = {
         navigate(dir) {
             hideCursor();
@@ -332,12 +362,14 @@
     // ---------- Gemeinsam ----------
 
     function navigate(dir) {
+        playerHover.lastInput = performance.now();
         if (osk.isOpen()) osk.handle(dir);
         else if (switcher.isOpen()) switcher.handle(dir);
         else mode.navigate(dir);
     }
 
     function onPress(btn) {
+        playerHover.lastInput = performance.now();
         if (osk.isOpen()) {
             switch (btn) {
                 case BTN.A: osk.handle('select'); break;
@@ -488,7 +520,10 @@
         // Kombination gilt als beendet, sobald beide Tasten losgelassen sind
         if (!s.buttons[BTN.VIEW] && !s.buttons[BTN.START]) quit.combo = false;
 
-        if (!isJellyfin) nav.update();
+        if (!isJellyfin) {
+            keepPlayerControls(now);
+            nav.update();
+        }
     }
 
     // Beim Wechsel des Dienstes läuft die Wiedergabe im Hintergrund-Tab sonst weiter

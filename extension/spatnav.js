@@ -161,6 +161,8 @@
         ring.classList.toggle('jdf-open', show);
         if (!show) return;
         const r = current.getBoundingClientRect();
+        // Bei kleinen Knöpfen (Player-Leiste) dünner, sonst verdeckt der Rahmen die Nachbar-Icons
+        ring.classList.toggle('jdf-small', Math.min(r.width, r.height) < 64);
         Object.assign(ring.style, { left: `${r.left - 4}px`, top: `${r.top - 4}px`, width: `${r.width + 8}px`, height: `${r.height + 8}px` });
     }
 

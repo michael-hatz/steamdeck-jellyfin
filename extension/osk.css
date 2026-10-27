@@ -133,3 +133,26 @@
     height: 100%;
     background: #00a4dc;
 }
+
+/* Suchvorschläge der Seite (Zeile über den Tasten) */
+#jellyfin-deck-osk .jdo-suggestions {
+    display: flex;
+    gap: 0.35em;
+    margin-bottom: 0.6em;
+    padding: 0.15em 0.1em;
+    overflow: hidden;
+}
+
+#jellyfin-deck-osk .jdo-suggestions:empty {
+    display: none;
+}
+
+#jellyfin-deck-osk .jdo-suggestion {
+    flex: 0 0 auto;
+    max-width: 40%;
+    padding: 0.45em 0.8em;
+    font-size: 0.85em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

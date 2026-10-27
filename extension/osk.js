@@ -23,6 +23,9 @@
         ['done', '✓ Fertig', 2]
     ];
 
+    const SUGGESTION_LISTS = '.ytSearchboxComponentSuggestionsContainer, .sbdd_a, .sbsb_a';
+    const SUGGESTION_OPTIONS = '[role="option"], .ytSearchboxComponentSuggestion, .sbsb_c';
+
     const nativeValueSetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set;
     const nativeTextareaSetter = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value').set;
 
@@ -34,6 +37,10 @@
     let shift = false;
     let row = 0;
     let col = 0;
+    // Suchvorschläge der Seite (z. B. YouTube); Zeile -1 = Vorschlagszeile über den Tasten
+    let suggestions = [];
+    let suggestionTimer = null;
+    let suggestionBar = null;
 
     function rows() {
         return (shift ? ROWS_UPPER : ROWS_LOWER).concat([SPECIAL_ROW]);
@@ -44,6 +51,7 @@
         root.id = 'jellyfin-deck-osk';
         root.innerHTML = `
             <div class="jdo-preview"></div>
+            <div class="jdo-suggestions"></div>
             <div class="jdo-grid"></div>
             <div class="jdo-hints">
                 <span><b>A</b> Tippen</span>
@@ -55,9 +63,10 @@
             </div>`;
         preview = root.querySelector('.jdo-preview');
         grid = root.querySelector('.jdo-grid');
+        suggestionBar = root.querySelector('.jdo-suggestions');
         // Maus/Touch (z. B. abgedockt am Deck-Display)
-        grid.addEventListener('mousedown', (e) => e.preventDefault());
-        grid.addEventListener('click', (e) => {
+        root.addEventListener('mousedown', (e) => e.preventDefault());
+        root.addEventListener('click', (e) => {
             const key = e.target.closest('.jdo-key');
             if (!key) return;
             row = Number(key.dataset.row);
@@ -68,6 +77,25 @@
     }
 
     function render() {
+        if (row < 0 && !suggestions.length) row = 0;
+        suggestionBar.innerHTML = '';
+        suggestions.forEach((text, ci) => {
+            const el = document.createElement('div');
+            el.className = 'jdo-key jdo-suggestion';
+            el.textContent = text;
+            if (row < 0 && ci === col) el.classList.add('jdo-focus');
+            el.dataset.row = -1;
+            el.dataset.col = ci;
+            suggestionBar.appendChild(el);
+        });
+        const focused = suggestionBar.querySelector('.jdo-focus');
+        if (focused) {
+            // horizontal mitscrollen, ohne die Seite zu bewegen
+            const bar = suggestionBar.getBoundingClientRect();
+            const r = focused.getBoundingClientRect();
+            if (r.left < bar.left) suggestionBar.scrollLeft -= bar.left - r.left + 20;
+            else if (r.right > bar.right) suggestionBar.scrollLeft += r.right - bar.right + 20;
+        }
         grid.innerHTML = '';
         rows().forEach((r, ri) => {
             const rowEl = document.createElement('div');
@@ -121,6 +149,10 @@
     }
 
     function press() {
+        if (row < 0) {
+            chooseSuggestion(suggestions[col]);
+            return;
+        }
         const k = rows()[row][col];
         if (!Array.isArray(k)) {
             type(k);
@@ -136,16 +168,71 @@
 
     function move(dr, dc) {
         const all = rows();
+        const first = suggestions.length ? -1 : 0;
         if (dr !== 0) {
-            const oldRow = all[row];
-            // relative Position beibehalten, da die Sonderreihe weniger Tasten hat
-            const rel = (col + 0.5) / oldRow.length;
-            row = (row + dr + all.length) % all.length;
-            col = Math.min(all[row].length - 1, Math.floor(rel * all[row].length));
+            const next = row + dr < first ? all.length - 1 : row + dr >= all.length ? first : row + dr;
+            if (row < 0) {
+                // aus der Vorschlagszeile: Tastenzeile in der Mitte
+                col = Math.floor(all[next].length / 2);
+            } else if (next >= 0) {
+                // relative Position beibehalten, da die Sonderreihe weniger Tasten hat
+                const rel = (col + 0.5) / all[row].length;
+                col = Math.min(all[next].length - 1, Math.floor(rel * all[next].length));
+            } else {
+                col = 0;
+            }
+            row = next;
         } else {
-            col = (col + dc + all[row].length) % all[row].length;
+            const len = row < 0 ? suggestions.length : all[row].length;
+            col = (col + dc + len) % len;
         }
         render();
+    }
+
+    // Vorschlagsliste, die zum Textfeld gehört (ARIA-Combobox, YouTube-Suche …)
+    function readSuggestions() {
+        if (!target || target.type === 'password') return [];
+        const lists = [];
+        for (const attr of ['aria-controls', 'aria-owns']) {
+            for (const id of (target.getAttribute(attr) || '').split(/\s+/)) {
+                const el = id && document.getElementById(id);
+                if (el) lists.push(el);
+            }
+        }
+        if (!lists.length) {
+            // Kein Verweis gesetzt: sichtbare Listbox in der Nähe des Felds
+            let box = target.parentElement;
+            for (let i = 0; box && i < 6 && !lists.length; i++, box = box.parentElement) {
+                lists.push(...box.querySelectorAll('[role="listbox"]'));
+            }
+        }
+        // YouTube hängt die Liste je nach Version ohne Verweis ins Dokument
+        if (!lists.length) lists.push(...document.querySelectorAll(SUGGESTION_LISTS));
+        const texts = [];
+        for (const list of lists) {
+            for (const option of list.querySelectorAll(SUGGESTION_OPTIONS)) {
+                const r = option.getBoundingClientRect();
+                if (r.width === 0 || r.height === 0) continue;
+                // erste Zeile: ohne „Entfernen“-Knöpfe o. Ä.
+                const text = (option.innerText || option.textContent || '').trim().split('\n')[0].trim();
+                if (text && !texts.includes(text)) texts.push(text);
+            }
+        }
+        return texts;
+    }
+
+    function refreshSuggestions() {
+        const next = readSuggestions();
+        if (next.join('\n') === suggestions.join('\n')) return;
+        suggestions = next;
+        if (row < 0) col = Math.min(col, Math.max(0, suggestions.length - 1));
+        render();
+    }
+
+    function chooseSuggestion(text) {
+        if (!text) return;
+        setValue(text);
+        finish();
     }
 
     // done: wird bei „Fertig“ aufgerufen (nicht bei B), z. B. um eine Suche abzuschicken
@@ -156,12 +243,17 @@
         shift = false;
         row = 1;
         col = 0;
+        suggestions = [];
         root.classList.add('jdo-open');
         render();
+        clearInterval(suggestionTimer);
+        suggestionTimer = setInterval(refreshSuggestions, 300);
     }
 
     function close() {
         if (!root) return;
+        clearInterval(suggestionTimer);
+        suggestionTimer = null;
         root.classList.remove('jdo-open');
         if (target) target.focus();
         target = null;

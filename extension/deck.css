@@ -109,6 +109,12 @@
     display: block;
 }
 
+#jellyfin-deck-focus.jdf-small {
+    border-width: 3px;
+    border-radius: 8px;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.6);
+}
+
 /* Mauszeiger (rechter Stick) */
 #jellyfin-deck-cursor {
     display: none;

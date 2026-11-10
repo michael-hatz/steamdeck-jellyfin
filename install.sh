@@ -3,6 +3,7 @@
 #
 #   ./install.sh http://192.168.178.20:8096
 #   ./install.sh            (erneut: übernimmt die gespeicherte Adresse)
+#   ./install.sh none       (ohne Jellyfin-Server, nur die Streaming-Dienste)
 set -euo pipefail
 
 APP_ID="org.chromium.Chromium"
@@ -14,27 +15,39 @@ DESKTOP_FILE="$HOME/.local/share/applications/jellyfin-deck.desktop"
 SYSTEMD_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/systemd/user"
 
 URL="${1:-}"
-if [ -z "$URL" ] && [ -f "$CONFIG_DIR/config" ]; then
+if [ -z "$URL" ] && [ -f "$CONFIG_DIR/config" ] && grep -q '^JELLYFIN_URL=' "$CONFIG_DIR/config"; then
     URL="$(grep '^JELLYFIN_URL=' "$CONFIG_DIR/config" | cut -d= -f2- | tr -d '"' || true)"
-    [ -n "$URL" ] && echo "==> Verwende gespeicherte Adresse $URL"
+    if [ -n "$URL" ]; then
+        echo "==> Verwende gespeicherte Adresse $URL"
+    else
+        echo "==> Ohne Jellyfin-Server (gespeicherte Einstellung)"
+        URL="none"
+    fi
 fi
 if [ -z "$URL" ]; then
-    read -rp "Jellyfin-Adresse (z. B. http://192.168.178.20:8096): " URL
+    read -rp "Jellyfin-Adresse (z. B. http://192.168.178.20:8096, leer lassen ohne Jellyfin): " URL
 fi
-# Abschließende Slashes und ein evtl. mitkopiertes /web/... entfernen
-URL="${URL%%/web/*}"
-URL="${URL%/}"
-URL="${URL%/web}"
 case "$URL" in
-    http://*|https://*) ;;
-    *) URL="http://$URL" ;;
+    ""|none|-) URL="" ;;
+    *)
+        # Abschließende Slashes und ein evtl. mitkopiertes /web/... entfernen
+        URL="${URL%%/web/*}"
+        URL="${URL%/}"
+        URL="${URL%/web}"
+        case "$URL" in
+            http://*|https://*) ;;
+            *) URL="http://$URL" ;;
+        esac
+        ;;
 esac
 
-echo "==> Prüfe Jellyfin unter $URL ..."
-if curl -sf -m 5 "$URL/System/Info/Public" >/dev/null; then
-    echo "    Server erreichbar."
-else
-    echo "    WARNUNG: Server nicht erreichbar – Installation wird trotzdem fortgesetzt."
+if [ -n "$URL" ]; then
+    echo "==> Prüfe Jellyfin unter $URL ..."
+    if curl -sf -m 5 "$URL/System/Info/Public" >/dev/null; then
+        echo "    Server erreichbar."
+    else
+        echo "    WARNUNG: Server nicht erreichbar – Installation wird trotzdem fortgesetzt."
+    fi
 fi
 
 echo "==> Chromium (Flatpak) ..."
@@ -72,7 +85,7 @@ else
     SCALE="1"
 fi
 cat > "$CONFIG_DIR/config" <<EOF
-# Adresse des Jellyfin-Servers (ohne /web)
+# Adresse des Jellyfin-Servers (ohne /web); leer: ohne Jellyfin
 JELLYFIN_URL="$URL"
 # Zoomfaktor der Oberfläche, z. B. 1.25 wenn alles zu klein ist
 SCALE="$SCALE"

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Startet Jellyfin im Vollbild (Chromium-Kiosk) mit Controller-Erweiterung.
+# Startet Chromium im Vollbild (Kiosk) mit Controller-Erweiterung. Erste Seite ist das
+# Dienste-Menü, damit es auch ohne (erreichbaren) Jellyfin-Server weitergeht.
 # Wird von Steam als "Nicht-Steam-Spiel" aufgerufen.
 set -u
 
@@ -7,27 +8,18 @@ CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/jellyfin-deck/config"
 APP_ID="org.chromium.Chromium"
 DATA_DIR="$HOME/.var/app/$APP_ID/data/jellyfin-deck"
 ARTWORK_DIR="$HOME/.local/share/jellyfin-deck/steam"
+# Feste ID der eigenen Erweiterung (aus "key" in extension/manifest.json)
+EXTENSION_ID="lekpkojeghpjmpbgibcabipeoikhannn"
 
 JELLYFIN_URL=""
 SCALE="1"
 # shellcheck source=/dev/null
 [ -f "$CONFIG" ] && . "$CONFIG"
 
-if [ -z "$JELLYFIN_URL" ]; then
-    echo "Keine JELLYFIN_URL in $CONFIG gesetzt." >&2
-    exit 1
-fi
-
 # Bilder für den Steam-Eintrag nachtragen, falls er bei der Installation noch fehlte
 [ -f "$ARTWORK_DIR/set-artwork.py" ] && python3 -I "$ARTWORK_DIR/set-artwork.py" "$ARTWORK_DIR" >/dev/null 2>&1 &
 
-# Nach dem Aufwachen aus dem Standby braucht das WLAN manchmal ein paar Sekunden
-for _ in $(seq 1 20); do
-    curl -sf -m 2 -o /dev/null "$JELLYFIN_URL/System/Info/Public" && break
-    sleep 1
-done
-
-# Adresse für das Dienste-Menü an die Erweiterung weitergeben
+# Adresse für das Dienste-Menü an die Erweiterung weitergeben (leer: Jellyfin fehlt im Menü)
 printf "self.JD_JELLYFIN_URL = '%s';\n" "${JELLYFIN_URL//\'/}" > "$DATA_DIR/extension/config.js"
 
 # Eigene Erweiterung plus Werbeblocker (uBlock Origin Lite), SponsorBlock und
@@ -54,4 +46,4 @@ exec flatpak run --filesystem=/run/udev:ro "$APP_ID" \
     --disable-session-crashed-bubble \
     --hide-crash-restore-bubble \
     --password-store=basic \
-    "$JELLYFIN_URL/web/index.html"
+    "chrome-extension://$EXTENSION_ID/start.html"

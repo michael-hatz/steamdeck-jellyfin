@@ -8,7 +8,8 @@ startet ihn in einem eigenen Chromium-Profil im Kiosk-Modus. Eine kleine Browser
 übersetzt die Controller-Eingaben in Fernbedienungs-Befehle und bringt eine eigene
 Bildschirmtastatur mit.
 
-Über das **Dienste-Menü** (Taste **X**) wechselst du außerdem zu ARD Mediathek, ZDF Mediathek,
+Nach dem Start erscheint zuerst das **Dienste-Menü**; über die Taste **X** kommst du jederzeit
+dorthin zurück. Damit wechselst du zu ARD Mediathek, ZDF Mediathek,
 YouTube, ARTE, RTL+, Netflix, Joyn und Plex. Jeder Dienst läuft in einem eigenen Tab; beim Zurückwechseln
 bist du wieder an derselben Stelle (die Wiedergabe wird beim Wechseln pausiert). Für YouTube werden
 **uBlock Origin Lite** (Werbeblocker), **SponsorBlock** (überspringt Sponsoren-Abschnitte) und
@@ -24,6 +25,9 @@ bist du wieder an derselben Stelle (die Wiedergabe wird beim Wechseln pausiert).
    cd steamdeck-jellyfin
    ./install.sh http://192.168.178.20:8096
    ```
+
+   Ohne eigenen Jellyfin-Server: `./install.sh none` – dann fehlt Jellyfin im Menü, die
+   Streaming-Dienste funktionieren wie gewohnt.
 
 3. Wenn Steam läuft, wird „Jellyfin“ automatisch als Nicht-Steam-Spiel eingetragen. Sonst:
    Steam → *Spiele* → *Ein Nicht-Steam-Spiel zu meiner Bibliothek hinzufügen* → „Jellyfin“.
@@ -116,7 +120,7 @@ Alternativ funktioniert auch die Steam-Tastatur (Xbox-Taste + X).
 `~/.config/jellyfin-deck/config`:
 
 ```bash
-JELLYFIN_URL="http://192.168.178.20:8096"
+JELLYFIN_URL="http://192.168.178.20:8096"   # leer: ohne Jellyfin
 SCALE="1"      # z. B. 1.25 oder 1.5, wenn die Oberfläche am TV zu klein ist
 ```
 
@@ -141,7 +145,11 @@ SCALE="1"      # z. B. 1.25 oder 1.5, wenn die Oberfläche am TV zu klein ist
   Hardware-Dekodierung von VP9/AV1, nicht im Video. enhanced-h264ify verhindert ihn, indem YouTube
   H.264 liefert (höchstens 1080p – für den Deck-Bildschirm reicht das). Fehlt die Erweiterung, wie
   oben beschrieben das Update anstoßen.
-- **Neue Server-Adresse:** `./install.sh <neue-adresse>` erneut ausführen.
+- **Neue Server-Adresse:** `./install.sh <neue-adresse>` erneut ausführen (oder `JELLYFIN_URL` in
+  der Einstellungsdatei ändern). Ist Jellyfin nicht erreichbar, steht im Dienste-Menü
+  „nicht erreichbar“ auf der Kachel; die anderen Dienste lassen sich trotzdem nutzen.
+- **Ein Dienst lädt nicht:** Statt der Fehlerseite des Browsers erscheint wieder das
+  Dienste-Menü mit dem Grund (z. B. kein WLAN nach dem Standby) – einfach erneut auswählen.
 
 ## Deinstallation
 
@@ -156,7 +164,7 @@ Danach den Eintrag „Jellyfin“ in Steam entfernen.
 | Datei                    | Zweck                                              |
 |--------------------------|----------------------------------------------------|
 | `install.sh`             | Installiert Chromium (Flatpak), uBlock Origin Lite, SponsorBlock, enhanced-h264ify, Launcher, Steam-Eintrag |
-| `jellyfin-deck.sh`       | Launcher: startet Chromium im Kiosk-Modus           |
+| `jellyfin-deck.sh`       | Launcher: startet Chromium im Kiosk-Modus mit dem Dienste-Menü |
 | `update.sh`              | Aktualisiert Chromium und die Erweiterungen         |
 | `steam/*`                | Bilder für die Steam-Bibliothek (PNG, Quellen als SVG) und `set-artwork.py`, das sie einträgt |
 | `systemd/*`              | Timer, der `update.sh` täglich ausführt             |
@@ -166,6 +174,7 @@ Danach den Eintrag „Jellyfin“ in Steam entfernen.
 | `extension/gamepad.js`   | Controller-Eingaben → Jellyfin bzw. Webseiten       |
 | `extension/spatnav.js`   | D-Pad-Navigation auf normalen Webseiten             |
 | `extension/switcher.js`  | Dienste-Menü (X)                                    |
+| `extension/start.html/.js` | Startseite: Dienste-Menü direkt nach dem Start    |
 | `extension/osk.js/.css`  | Bildschirmtastatur                                  |
 | `extension/deck.css`     | Dienste-Menü, Fokus-Rahmen, Mauszeiger              |
 | `extension/background.js`| Tab-Wechsel, echte Klicks/Vollbild, Beenden         |

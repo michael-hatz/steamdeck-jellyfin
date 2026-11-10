@@ -5,7 +5,8 @@
     const jellyfinUrl = (self.JD_JELLYFIN_URL || '').replace(/\/+$/, '');
 
     const services = [
-        { id: 'jellyfin', name: 'Jellyfin', url: `${jellyfinUrl}/web/index.html`, color: '#00a4dc' },
+        // Ohne eingetragenen Server fehlt Jellyfin im Menü
+        ...(jellyfinUrl ? [{ id: 'jellyfin', name: 'Jellyfin', url: `${jellyfinUrl}/web/index.html`, color: '#00a4dc' }] : []),
         { id: 'ard', name: 'ARD Mediathek', url: 'https://www.ardmediathek.de/', hosts: ['ardmediathek.de'], color: '#003480' },
         { id: 'zdf', name: 'ZDF Mediathek', url: 'https://www.zdf.de/', hosts: ['zdf.de'], color: '#fa7d19' },
         { id: 'youtube', name: 'YouTube', url: 'https://www.youtube.com/', hosts: ['youtube.com'], color: '#ff0000' },
@@ -22,7 +23,7 @@
 
     function serviceForUrl(url) {
         if (!url) return null;
-        if (jellyfinUrl && url.startsWith(`${jellyfinUrl}/`)) return services[0];
+        if (jellyfinUrl && url.startsWith(`${jellyfinUrl}/`)) return services.find((s) => s.id === 'jellyfin');
         let host;
         try {
             host = new URL(url).hostname;

@@ -1,9 +1,10 @@
 {
   "manifest_version": 3,
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvDLsbeYaNEF/AiUteIGJGzAwrMysgceM8OdHbPO+CPfLNX8lJ20nWTL4UqZErp1y+aNlWhTstHV0vnEu13Ow5kX0dr54zQaHU+3TrmXveUB+JDEZHvsMbi50Dfaq5x4Tw04w79Mn2pjjXxV8FnTVnkjH9fX4ZAl3zTpcN8S6cXoWeA7edNxe6ytZpUOK22Av/TiVurYGndGwtri3IGB9gGsoYoWI4vgbyw7B6gGaOtmlRH5/J/bp+7g+uvzB7crhwv/KD22GqiRPF/v+M4A3lh7reyIy/OiYCieqNbNj55pgsS4pRnROe7bH3IWURTTn1XiHW5eWy+1AIHLUCYLHuwIDAQAB",
   "name": "Jellyfin Deck",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Controller-Steuerung, Dienste-Menü und Bildschirmtastatur für Jellyfin und Streaming-Seiten.",
-  "permissions": ["tabs", "debugger", "storage"],
+  "permissions": ["tabs", "debugger", "storage", "webNavigation"],
   "host_permissions": ["<all_urls>"],
   "background": {
     "service_worker": "background.js"

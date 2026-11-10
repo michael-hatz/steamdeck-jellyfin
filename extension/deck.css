@@ -74,6 +74,36 @@
     display: block;
 }
 
+#jellyfin-deck-switcher .jds-note {
+    position: absolute;
+    right: 0.5em;
+    bottom: 0.4em;
+    font-size: 0.6em;
+    font-weight: 500;
+    opacity: 0.85;
+}
+
+#jellyfin-deck-switcher .jds-note:empty {
+    display: none;
+}
+
+/* Startseite: Menü ist die ganze Seite */
+#jellyfin-deck-switcher.jds-start {
+    background: #000;
+}
+
+#jellyfin-deck-switcher .jds-message {
+    margin-bottom: 1em;
+    padding: 0.6em 0.8em;
+    border-radius: 8px;
+    background: rgba(228, 0, 43, 0.25);
+    font-size: 0.75em;
+}
+
+#jellyfin-deck-switcher .jds-message:empty {
+    display: none;
+}
+
 #jellyfin-deck-switcher .jds-hints {
     display: flex;
     justify-content: center;

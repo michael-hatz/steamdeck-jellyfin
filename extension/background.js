@@ -5,6 +5,8 @@
 //    Viele Seiten reagieren nicht auf per Skript erzeugte Klicks, und Vollbild ist nur nach
 //    einer Nutzeraktion erlaubt. Die Debugger-Leiste blendet --silent-debugger-extension-api aus.
 //  - Beenden (View + Start halten): schließt alle Fenster, Steam kehrt in die Bibliothek zurück.
+//  - Lädt ein Dienst nicht (Server weg, kein WLAN), geht es zurück zur Startseite (start.html) –
+//    auf der Fehlerseite von Chromium laufen keine Content-Scripts, man säße dort fest.
 importScripts('config.js', 'services.js');
 
 const Services = self.JellyfinDeckServices;
@@ -22,25 +24,40 @@ async function rememberServiceTab(serviceId, tabId) {
     await chrome.storage.session.set({ serviceTabs: map });
 }
 
-async function findServiceTab(serviceId) {
-    const tabs = await chrome.tabs.query({});
+async function forgetServiceTab(tabId) {
+    const map = await serviceTabs();
+    for (const id of Object.keys(map)) {
+        if (map[id] === tabId) delete map[id];
+    }
+    await chrome.storage.session.set({ serviceTabs: map });
+}
+
+// exceptTabId: der Tab der Startseite, von der aus gewechselt wird
+async function findServiceTab(serviceId, exceptTabId) {
+    const tabs = (await chrome.tabs.query({})).filter((t) => t.id !== exceptTabId);
     const map = await serviceTabs();
     const remembered = tabs.find((t) => t.id === map[serviceId]);
     if (remembered) return remembered;
-    // z. B. der Jellyfin-Starttab oder ein Tab, den eine Seite selbst geöffnet hat
+    // z. B. ein Tab, den eine Seite selbst geöffnet hat
     return tabs
         .filter((t) => Services.forUrl(t.url || t.pendingUrl)?.id === serviceId)
         .sort((a, b) => (b.lastAccessed || 0) - (a.lastAccessed || 0))[0];
 }
 
-async function switchTo(serviceId) {
+// replaceTabId: Wechsel von der Startseite – deren Tab wird zum Dienst bzw. geschlossen,
+// wenn der Dienst schon einen Tab hat
+async function switchTo(serviceId, replaceTabId) {
     const service = Services.byId(serviceId);
     if (!service) return;
-    const tab = await findServiceTab(serviceId);
+    const tab = await findServiceTab(serviceId, replaceTabId);
     if (tab) {
         await chrome.tabs.update(tab.id, { active: true });
         await chrome.windows.update(tab.windowId, { focused: true });
         await rememberServiceTab(serviceId, tab.id);
+        if (replaceTabId) await chrome.tabs.remove(replaceTabId);
+    } else if (replaceTabId) {
+        await chrome.tabs.update(replaceTabId, { url: service.url });
+        await rememberServiceTab(serviceId, replaceTabId);
     } else {
         const created = await chrome.tabs.create({ url: service.url, active: true });
         await rememberServiceTab(serviceId, created.id);
@@ -110,7 +127,7 @@ async function closeOpenedTab(tabId) {
 }
 
 const handlers = {
-    'switch': (m) => switchTo(m.service),
+    'switch': (m, tabId) => switchTo(m.service, m.replace ? tabId : undefined),
     'click': (m, tabId) => click(tabId, m.x, m.y),
     'hover': (m, tabId) => hover(tabId, m.x, m.y),
     'key': (m, tabId) => pressKey(tabId, m.key),
@@ -139,5 +156,36 @@ chrome.tabs.onUpdated.addListener((tabId, change) => {
     const url = change.url || '';
     if (url.startsWith('chrome-extension://') && !url.startsWith(`chrome-extension://${chrome.runtime.id}/`)) {
         chrome.tabs.remove(tabId);
+    }
+});
+
+// Der Launcher öffnet start.html, oft bevor die Erweiterung geladen ist – dann zeigt der Tab
+// eine Fehlerseite (die Tab-URL bleibt start.html). Beim Browserstart solche Tabs neu laden.
+async function reloadStartPages() {
+    const start = chrome.runtime.getURL('start.html');
+    const tabs = await chrome.tabs.query({});
+    for (const t of tabs) {
+        if ((t.url || t.pendingUrl || '').startsWith(start)) chrome.tabs.reload(t.id);
+    }
+}
+
+chrome.runtime.onStartup.addListener(reloadStartPages);
+chrome.runtime.onInstalled.addListener(reloadStartPages);
+
+// Hauptseite eines Tabs konnte nicht geladen werden → Startseite mit Begründung.
+// ERR_ABORTED: Navigation abgebrochen (neue Navigation, Download …); BLOCKED_BY_CLIENT: Werbeblocker.
+const IGNORED_ERRORS = ['net::ERR_ABORTED', 'net::ERR_BLOCKED_BY_CLIENT'];
+
+chrome.webNavigation.onErrorOccurred.addListener(async (details) => {
+    if (details.frameId !== 0 || IGNORED_ERRORS.includes(details.error)) return;
+    if (!/^https?:/.test(details.url)) return;
+    const params = new URLSearchParams({ error: details.error });
+    const service = Services.forUrl(details.url);
+    if (service) params.set('service', service.id);
+    try {
+        await forgetServiceTab(details.tabId);
+        await chrome.tabs.update(details.tabId, { url: chrome.runtime.getURL(`start.html?${params}`) });
+    } catch (e) {
+        console.warn('[jellyfin-deck] Startseite', e);
     }
 });
